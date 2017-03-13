@@ -25,6 +25,23 @@ Calculator.prototype.pingPong = function(goal) {
 exports.calculatorModule = Calculator;
 
 },{}],3:[function(require,module,exports){
+var apiKey = require('./../.env').apiKey;
+
+function Weather(){
+
+}
+
+Weather.prototype.getWeather = function(city, displayTemp) {
+  $.get('http://api.openweathermap.org/data/2.5/weather?q=' + city + '&appid=' + apiKey).then(function(response) {
+    displayTemp(city, (response.main.temp * 9/5 - 459.67).toFixed(2));
+  }).fail(function(error) {
+    $('.showWeather').text(error.responseJSON.message);
+  });
+}
+
+exports.weatherModule = Weather;
+
+},{"./../.env":1}],4:[function(require,module,exports){
 var Calculator = require("./../js/pingpong.js").calculatorModule;
 
 $(document).ready(function() {
@@ -53,17 +70,19 @@ $(document).ready(function(){
 });
 
 var apiKey = require('./../.env').apiKey;
+var Weather = require('./../js/weather.js').weatherModule;
+
+var displayTemp = function(city, tempData) {
+  $('.showWeather').text("The temperature in " + city + " is " + tempData + ".");
+}
 
 $(document).ready(function() {
+  var currentWeatherObject = new Weather();
   $('#weatherLocation').click(function() {
     var city = $('#location').val();
     $('#location').val("");
-    $.get('http://api.openweathermap.org/data/2.5/weather?q=' + city + '&appid=' + apiKey, function(response) {
-      $('.showWeather').text("The weather in " + city + " is " + (response.main.temp * 9/5 - 459.67).toFixed(2) + ".");
-      console.log("Notice: The GET request has been made.");
-    });
-
+    var temperature = currentWeatherObject.getWeather(city, displayTemp);
   });
 });
 
-},{"./../.env":1,"./../js/pingpong.js":2}]},{},[3]);
+},{"./../.env":1,"./../js/pingpong.js":2,"./../js/weather.js":3}]},{},[4]);
